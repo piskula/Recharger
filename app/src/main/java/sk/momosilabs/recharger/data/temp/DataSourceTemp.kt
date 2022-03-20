@@ -1,10 +1,12 @@
-package sk.momosilabs.recharger.data
+package sk.momosilabs.recharger.data.temp
 
 import android.content.res.Resources
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import sk.momosilabs.recharger.data.ChargingEvent
+import sk.momosilabs.recharger.data.chargingMockData
 
-class DataSource(resources: Resources) {
+class DataSourceTemp(resources: Resources) {
     private val initialList = chargingMockData(resources)
 //    private val initialList = listOf<ChargingEvent>()
     private val chargingListLiveData = MutableLiveData(initialList)
@@ -38,18 +40,18 @@ class DataSource(resources: Resources) {
     }
 
     fun getChargingById(id: Long): ChargingEvent? =
-        chargingListLiveData.value?.let { flowers ->
-            return flowers.firstOrNull{ it.id == id}
+        chargingListLiveData.value?.let { events ->
+            return events.firstOrNull{ it.id == id}
         }
 
-    fun getFlowerList(): LiveData<List<ChargingEvent>> = chargingListLiveData
+    fun getChargingList(): LiveData<List<ChargingEvent>> = chargingListLiveData
 
     companion object {
-        private var INSTANCE: DataSource? = null
+        private var INSTANCE: DataSourceTemp? = null
 
-        fun getDataSource(resources: Resources): DataSource {
-            return synchronized(DataSource::class) {
-                val newInstance = INSTANCE ?: DataSource(resources)
+        fun getDataSource(resources: Resources): DataSourceTemp {
+            return synchronized(DataSourceTemp::class) {
+                val newInstance = INSTANCE ?: DataSourceTemp(resources)
                 INSTANCE = newInstance
                 newInstance
             }

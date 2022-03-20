@@ -8,14 +8,14 @@ import androidx.recyclerview.widget.RecyclerView
 import sk.momosilabs.recharger.R
 
 class ChargingListHeaderAdapter: RecyclerView.Adapter<ChargingListHeaderAdapter.HeaderViewHolder>() {
-    private var flowerCount: Int = 0
+    private var itemCount: Int = 0
 
     /* ViewHolder for displaying header. */
     class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view){
-        private val flowerNumberTextView: TextView = itemView.findViewById(R.id.count_number_text)
+        private val countNumberTextView: TextView = itemView.findViewById(R.id.count_number_text)
 
-        fun bind(flowerCount: Int) {
-            flowerNumberTextView.text = "${flowerCount} events"
+        fun bind(itemCount: Int) {
+            countNumberTextView.text = "${itemCount} events"
         }
     }
 
@@ -26,9 +26,9 @@ class ChargingListHeaderAdapter: RecyclerView.Adapter<ChargingListHeaderAdapter.
         return HeaderViewHolder(view)
     }
 
-    /* Binds number of flowers to the header. */
+    /* Binds number of events to the header. */
     override fun onBindViewHolder(holder: HeaderViewHolder, position: Int) {
-        holder.bind(flowerCount)
+        holder.bind(itemCount)
     }
 
     /* Returns number of items, since there is only one item in the header return one  */
@@ -36,9 +36,9 @@ class ChargingListHeaderAdapter: RecyclerView.Adapter<ChargingListHeaderAdapter.
         return 1
     }
 
-    /* Updates header to display number of flowers when a flower is added or subtracted. */
-    fun updateFlowerCount(updatedFlowerCount: Int) {
-        flowerCount = updatedFlowerCount
+    /* Updates header to display number of charging events when an event is added or subtracted. */
+    fun updateItemCount(newItemCount: Int) {
+        itemCount = newItemCount
         notifyDataSetChanged()
     }
 }

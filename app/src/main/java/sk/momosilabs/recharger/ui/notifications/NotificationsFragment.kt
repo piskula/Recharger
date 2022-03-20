@@ -1,10 +1,10 @@
 package sk.momosilabs.recharger.ui.notifications
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,7 +13,11 @@ import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import sk.momosilabs.recharger.data.temp.Post
+import sk.momosilabs.recharger.data.ChargingEvent
+import sk.momosilabs.recharger.data.ChargingEventEntity
+import sk.momosilabs.recharger.data.temp.DataGenerator.Companion.generateNextCharging
+import sk.momosilabs.recharger.data.toEntity
+import sk.momosilabs.recharger.data.toModel
 import sk.momosilabs.recharger.databinding.FragmentNotificationsBinding
 
 
@@ -26,7 +30,7 @@ class NotificationsFragment : Fragment() {
     private var _binding: FragmentNotificationsBinding? = null
 
     private lateinit var mRecyclerView: RecyclerView
-    private lateinit var mPostAdapter: PostAdapter
+    private lateinit var mChargingRecyclerAdapter: ChargingRecyclerAdapter
     private lateinit var mDatabase: DatabaseReference
 
     // This property is only valid between onCreateView and
@@ -51,13 +55,13 @@ class NotificationsFragment : Fragment() {
         mRecyclerView = binding.rv
         mRecyclerView.layoutManager = mManager
 
-        mDatabase = Firebase.database.reference.child("posts")
-        val options = FirebaseRecyclerOptions.Builder<Post>()
-            .setQuery(mDatabase.limitToLast(5), Post::class.java)
+        mDatabase = Firebase.database.reference.child("chargingHistory")
+        val options = FirebaseRecyclerOptions.Builder<ChargingEventEntity>()
+            .setQuery(mDatabase.limitToLast(5), ChargingEventEntity::class.java)
             .build()
 
-        mPostAdapter = PostAdapter(options)
-        mRecyclerView.adapter = mPostAdapter
+        mChargingRecyclerAdapter = ChargingRecyclerAdapter(options) { charging -> onChargingClick(charging) }
+        mRecyclerView.adapter = mChargingRecyclerAdapter
 
         binding.fabNotif.setOnClickListener { fabOnClick() }
 
@@ -66,12 +70,12 @@ class NotificationsFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        mPostAdapter.startListening()
+        mChargingRecyclerAdapter.startListening()
     }
 
     override fun onStop() {
         super.onStop()
-        mPostAdapter.stopListening()
+        mChargingRecyclerAdapter.stopListening()
     }
 
     override fun onDestroyView() {
@@ -80,19 +84,19 @@ class NotificationsFragment : Fragment() {
     }
 
     private fun fabOnClick() {
-        val count = mPostAdapter.itemCount
-        Log.i(TAG, "item amount $count")
+        val count = mChargingRecyclerAdapter.itemCount
+        val lastCharging = if (count > 0) mChargingRecyclerAdapter.getItem(count - 1).toModel() else null
 
-        val lastTitle = if (count > 0) mPostAdapter.getItem(count - 1).title else 0
-        Log.i(TAG, "last title: $lastTitle")
         mDatabase.push().setValue(
-            Post(
-                title = lastTitle + 1,
-                body = "ou yeah body",
-            )
+            generateNextCharging(lastCharging = lastCharging).toEntity()
         )
         // remove when done in separate activity (?)
         mRecyclerView.smoothScrollToPosition(count)
+    }
+
+    private fun onChargingClick(event: ChargingEvent) {
+        Toast.makeText(context, "Clicked ${event.id}", Toast.LENGTH_SHORT).show()
+        // intent, startActivity with charging detail
     }
 
 }
